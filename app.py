@@ -1,7 +1,8 @@
 import datetime
 import streamlit as st
+from pydantic import ValidationError
 
-import model
+from model import Vendas
 
 def main():
     st.title("Sistema de CRM e Vendas - ZapFlow")
@@ -9,7 +10,9 @@ def main():
     data =st.date_input("Data da venda")
     hora =st.time_input("Hora da venda")
     valor =st.number_input("Valor da venda")
-    quantidade =st.number_input("Quantidade vendida")
+    quantidade =st.number_input(
+        "Quantidade vendida",
+        min_value=1,)
     produto = st.selectbox(
         "Produto:",
         [
@@ -20,13 +23,21 @@ def main():
         )
 
     if st.button("Finalizar"):
-
-        data_hora = datetime.datetime.combine(data, hora)
-        st.write("Email: ", email)
-        st.write("Data: ", data_hora)
-        st.write("Valor: ", valor)
-        st.write("Quantidade: ", quantidade)
-        st.write("Produto: ", produto)
+        try:
+            
+            data_hora = datetime.datetime.combine(data, hora)
+            venda = Vendas(
+            email=email,
+            data=data_hora,
+            valor=valor,
+            quantidade=quantidade,
+            produto=produto
+            )
+            st.write(venda)
+        except ValidationError as e:
+            st.error(
+                f"Por favor, preencha todos os campos corretamente {e}"
+                )
 
 
 if __name__ == "__main__":
